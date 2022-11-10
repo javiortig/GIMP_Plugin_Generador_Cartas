@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 
 from gimpfu import *
+import gimpcolor
 import csv as csv
+
+art_layer = 0
+BLACK_COLOR = 'black'
+WHITE_COLOR = 'white'
 
 def generate(file,dir):
     imgList = gimp.image_list()
@@ -15,9 +20,35 @@ def generate(file,dir):
             csvReader = csv.DictReader(csvfile, delimiter=',')
             id = 1
             for row in csvReader:
+                if(row['Nombre'] == '' or row['Nombre'] == None):
+                    continue
+
                 generateCard(img, row, dir, id)
                 id = id + 1
     return
+
+def cambiarImagen(image, cardParams):
+    tempArtLayer = pdb.gimp_file_load_layer(image,'/home/javiortig/pokemon_card_game/mis_cartas/imagenes/Cacturne')
+    pdb.gimp_image_add_layer(image, tempArtLayer,0)
+
+    #Redimensiono el splashart
+    pdb.gimp_layer_scale(tempArtLayer,  680, 400, True)
+
+    #Calculo la pos final del splashart
+    xgoal = 40
+    ygoal = 95
+    xOffset, yOffset = tempArtLayer.offsets
+    xOffset = xgoal - xOffset
+    yOffset = ygoal - yOffset
+
+    pdb.gimp_layer_translate(tempArtLayer, xOffset, yOffset)
+
+    image.lower_layer(tempArtLayer)
+
+    global art_layer
+    art_layer = tempArtLayer
+    
+    
 
 def cambiarTiposPokemon(image, cardParams):
     # Cambiamos el 1er tipo
@@ -73,7 +104,9 @@ def cambiarTiposPokemon(image, cardParams):
         change_visible(image, 'Tipo_1_Siniestro', True) 
 
     elif(cardParams['Tipo_1'] == 'Hada'):
-        change_visible(image, 'Tipo_1_Hada', True)  
+        change_visible(image, 'Tipo_1_Hada', True)
+    else:
+        gimp.pdb.gimp_message(cardParams['Tipo_1'] + ' Tipo invalido en: '+ cardParams['Nombre'] + '_'+cardParams['Raza'])
 
 
     # Cambiamos el 2do tipo
@@ -129,7 +162,9 @@ def cambiarTiposPokemon(image, cardParams):
         change_visible(image, 'Tipo_2_Siniestro', True) 
 
     elif(cardParams['Tipo_2'] == 'Hada'):
-        change_visible(image, 'Tipo_2_Hada', True)  
+        change_visible(image, 'Tipo_2_Hada', True)
+
+  
 
 def resetear(image, cardParams):
     # Reseteamos el Tipo_1 para la siguiente carta
@@ -518,7 +553,11 @@ def resetear(image, cardParams):
         change_visible(image, 'base_siniestro', False) 
 
     elif(cardParams['Tipo_1'] == 'Hada'):
-        change_visible(image, 'base_hada', False)   
+        change_visible(image, 'base_hada', False)  
+
+    # Reseteamos el splashart para el siguiente
+    image.remove_layer(art_layer) 
+    
 
 def cambiarHabilidad(image, cardParams):
     change_text(image,'Nombre_Habilidad', cardParams['Nombre_Habilidad'])
@@ -542,10 +581,9 @@ def cambiarPrimerAtaque(image, cardParams):
 
     elif(cardParams['Clase_ataque_1'] == 'Especial'):
         change_visible(image, 'Especial_1', True) 
-    
     else:
-        gimp.pdb.gimp_message(cardParams['Clase_ataque_1'] + ' no es una clase valida.')
-
+        gimp.pdb.gimp_message(cardParams['Clase_ataque_1'] + ' Clase invalida en: '+ cardParams['Nombre'] + '_'+cardParams['Raza']);
+  
     #Cambiamos el tipo del ataque
     if(cardParams['Tipo_ataque_1'] == 'Normal'):
         change_visible(image, 'Ataque_1_Normal', True) 
@@ -600,6 +638,9 @@ def cambiarPrimerAtaque(image, cardParams):
 
     elif(cardParams['Tipo_ataque_1'] == 'Hada'):
         change_visible(image, 'Ataque_1_Hada', True)  
+    else:
+        gimp.pdb.gimp_message(cardParams['Tipo_ataque_1'] + ' Tipo invalido en: '+ cardParams['Nombre'] + '_'+cardParams['Raza']);
+
 
 def cambiarSegundoAtaque(image, cardParams):
     change_text(image,'Nombre_ataque_2', cardParams['Nombre_ataque_2'])
@@ -619,9 +660,9 @@ def cambiarSegundoAtaque(image, cardParams):
 
     elif(cardParams['Clase_ataque_2'] == 'Especial'):
         change_visible(image, 'Especial_2', True) 
-    
     else:
-        gimp.pdb.gimp_message(cardParams['Clase_ataque_2'] + ' no es una clase valida.')
+        gimp.pdb.gimp_message(cardParams['Clase_ataque_2'] + ' clase invalida en: '+ cardParams['Nombre'] + '_'+cardParams['Raza']);
+
 
     #Cambiamos el tipo del ataque
     if(cardParams['Tipo_ataque_2'] == 'Normal'):
@@ -677,6 +718,9 @@ def cambiarSegundoAtaque(image, cardParams):
 
     elif(cardParams['Tipo_ataque_2'] == 'Hada'):
         change_visible(image, 'Ataque_2_Hada', True)  
+    else:
+        gimp.pdb.gimp_message(cardParams['Tipo_ataque_2'] + ' tipo invalida en: '+ cardParams['Nombre'] + '_'+cardParams['Raza']);
+    
 
 #Ulti
 def cambiarTercerAtaque(image, cardParams):
@@ -702,7 +746,8 @@ def cambiarTercerAtaque(image, cardParams):
 
         elif (cardParams['Coste_energia'] == '5'):
             change_visible(image, 'energia_5', True) 
-
+        else:
+            change_visible(image, 'energia_0', True) 
 
     change_text(image,'Nombre_ataque_3', cardParams['Nombre_ataque_3'])
     change_text(image,'Potencia_3', cardParams['Potencia_3'])
@@ -721,10 +766,10 @@ def cambiarTercerAtaque(image, cardParams):
 
     elif(cardParams['Clase_ataque_3'] == 'Especial'):
         change_visible(image, 'Especial_3', True) 
-    
     else:
-        gimp.pdb.gimp_message(cardParams['Clase_ataque_3'] + ' no es una clase valida.')
-
+        gimp.pdb.gimp_message(cardParams['Clase_ataque_3'] + ' clase invalida en: '+ cardParams['Nombre'] + '_'+cardParams['Raza']);
+ 
+    
     #Cambiamos el tipo del ataque
     if(cardParams['Tipo_ataque_3'] == 'Normal'):
         change_visible(image, 'Ataque_3_Normal', True) 
@@ -779,6 +824,9 @@ def cambiarTercerAtaque(image, cardParams):
 
     elif(cardParams['Tipo_ataque_3'] == 'Hada'):
         change_visible(image, 'Ataque_3_Hada', True)  
+    else:
+        gimp.pdb.gimp_message(cardParams['Tipo_ataque_3'] + ' tipo invalida en: '+ cardParams['Nombre'] + '_'+cardParams['Raza']);
+ 
 
 def cambiarVida(image, cardParams):
     vida_int = int(cardParams['Vida'])
@@ -843,17 +891,62 @@ def cambiarCartaBase(image, cardParams):
         change_visible(image, 'base_siniestro', True) 
 
     elif(cardParams['Tipo_1'] == 'Hada'):
-        change_visible(image, 'base_hada', True)  
+        change_visible(image, 'base_hada', True) 
+
+# Cambia el color de las capas para asegurarnos que se lea bien
+def changeTextColors(image, cardParams):
+    if(cardParams['Tipo_1'] == 'Siniestro' or cardParams['Tipo_1'] == 'Fantasma'):
+        change_text_color(image, 'Nombre', WHITE_COLOR)
+        change_text_color(image, 'Pokedex', BLACK_COLOR)
+
+        change_text_color(image, 'Nombre_ataque_1', WHITE_COLOR)
+        change_text_color(image, 'Potencia_1', WHITE_COLOR)
+        change_text_color(image, 'Efecto_del_ataque_1', WHITE_COLOR)
+        change_text_color(image, 'Nombre_ataque_2', WHITE_COLOR)
+        change_text_color(image, 'Potencia_2', WHITE_COLOR)
+        change_text_color(image, 'Efecto_del_ataque_2', WHITE_COLOR)
+        change_text_color(image, 'Nombre_ataque_3', WHITE_COLOR)
+        change_text_color(image, 'Potencia_3', WHITE_COLOR)
+        change_text_color(image, 'Efecto_del_ataque_3', WHITE_COLOR)
+
+        change_text_color(image, 'Efecto_Habilidad', WHITE_COLOR)
+
+        change_text_color(image, 'Creador', WHITE_COLOR)
+        change_text_color(image, 'Gen. 1', WHITE_COLOR)
+
+
+    else:
+        change_text_color(image, 'Nombre', BLACK_COLOR)
+        change_text_color(image, 'Pokedex', BLACK_COLOR)
+
+        change_text_color(image, 'Nombre_ataque_1', BLACK_COLOR)
+        change_text_color(image, 'Potencia_1', BLACK_COLOR)
+        change_text_color(image, 'Efecto_del_ataque_1', BLACK_COLOR)
+        change_text_color(image, 'Nombre_ataque_2', BLACK_COLOR)
+        change_text_color(image, 'Potencia_2', BLACK_COLOR)
+        change_text_color(image, 'Efecto_del_ataque_2', BLACK_COLOR)
+        change_text_color(image, 'Nombre_ataque_3', BLACK_COLOR)
+        change_text_color(image, 'Potencia_3', BLACK_COLOR)
+        change_text_color(image, 'Efecto_del_ataque_3', BLACK_COLOR)
+
+        change_text_color(image, 'Efecto_Habilidad', BLACK_COLOR)
+
+        change_text_color(image, 'Creador', BLACK_COLOR)
+        change_text_color(image, 'Gen. 1', BLACK_COLOR)
+
+
 
 def generateCard(image, cardParams, dir, id):
     # Cambiamos el nombre
     change_text(image,'Nombre', cardParams['Nombre'])
+    
 
     # Cambiamos el texto de pokedex
     change_text(image,'Pokedex','No ' + cardParams['Num_Pokedex'] +'. ' + cardParams['Peso'] + 'kg. Raza ' + cardParams['Raza'])
 
     cambiarTiposPokemon(image, cardParams)
 
+    cambiarHabilidad(image, cardParams)
     cambiarPrimerAtaque(image, cardParams)
     cambiarSegundoAtaque(image, cardParams)
     cambiarTercerAtaque(image, cardParams)
@@ -864,11 +957,15 @@ def generateCard(image, cardParams, dir, id):
     cambiarVida(image, cardParams)
 
     cambiarCartaBase(image, cardParams)
+
+    cambiarImagen(image, cardParams)
+
+    changeTextColors(image, cardParams)
     
     # Guardamos la imagen
     new_image = pdb.gimp_image_duplicate(image)
     layer = pdb.gimp_image_merge_visible_layers(new_image, CLIP_TO_IMAGE)
-    pdb.gimp_file_save(new_image, layer, dir + '/' + cardParams['Nombre'] + '_' + cardParams['Raza']+ '.png', '?')
+    pdb.gimp_file_save(new_image, layer, dir + '/' + cardParams['Tipo_1'] + '/' + cardParams['Nombre'] + '_' + cardParams['Raza']+ '.png', '?')
     pdb.gimp_image_delete(new_image)
 
     resetear(image, cardParams)
@@ -878,6 +975,11 @@ def generateCard(image, cardParams, dir, id):
 def change_text(image, layerName, text):
     layer = pdb.gimp_image_get_layer_by_name(image, layerName)
     pdb.gimp_text_layer_set_text(layer, text)
+    return
+
+def change_text_color(image, layerName, color):
+    layer = pdb.gimp_image_get_layer_by_name(image, layerName)
+    pdb.gimp_text_layer_set_color(layer, color)
     return
         
 def change_visible(image, layerName, visible):
@@ -900,7 +1002,7 @@ register(
     "",
     [
  	(PF_FILE, "file", "CSV file", ""),
-    (PF_DIRNAME, "dir", "Output directory", "/home/javiortig/pokemon_card_game/plugins"),
+    (PF_DIRNAME, "dir", "Output directory", "/home/javiortig/pokemon_card_game/mis_cartas"),
     ],
     [],
     generate, menu="<Image>/Image/Generate_Cards_pokemon")
