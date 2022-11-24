@@ -1,0 +1,363 @@
+#!/usr/bin/env python
+
+from gimpfu import *
+import csv as csv
+
+art_layer = 0
+BLACK_COLOR = 'black'
+WHITE_COLOR = 'white'
+MAX_LEN_EFECTO = 72
+MAX_LEN_NOMBRES = 25
+
+def generate(file,dir):
+    imgList = gimp.image_list()
+    if(len(imgList) < 1):
+        gimp.pdb.gimp_message("Open base image as first image please")
+    else:
+        img = imgList[len(imgList)-1] #index 0 is the rightmost image, we want the left most one 
+        layers = img.layers
+        unique_moves = set()
+        with open(file, 'rb') as csvfile:
+            csvReader = csv.DictReader(csvfile, delimiter=',')
+            for row in csvReader:
+                if(row['Nombre'] == '' or row['Nombre'] == None):
+                    continue
+                
+                # Evita que el texto se solape
+                if(len(row['Efecto_Habilidad']) > MAX_LEN_EFECTO or len(row['Efecto_del_ataque_1']) > MAX_LEN_EFECTO or len(row['Efecto_del_ataque_2']) > MAX_LEN_EFECTO or len(row['Efecto_del_ataque_3']) > MAX_LEN_EFECTO):
+                    gimp.pdb.gimp_message('Longitud invalida en los efectos de ' + row['Nombre'] + '_'+ row['Raza'])
+                    break
+
+                if(len(row['Nombre_Habilidad']) > MAX_LEN_NOMBRES or len(row['Nombre_ataque_1']) > MAX_LEN_NOMBRES or len(row['Nombre_ataque_2']) > MAX_LEN_NOMBRES or len(row['Nombre_ataque_3']) > MAX_LEN_NOMBRES):
+                    gimp.pdb.gimp_message('Longitud invalida en los Nombres de ' + row['Nombre'] + '_'+ row['Raza'])
+                    break
+
+                # Recorre cada fila de pokemon buscando ataques unicos
+                for it in range(1, 4):
+                    if(row['Nombre_ataque_' + str(it)] == ''):
+                        continue
+                    
+                    temp_move = {
+                        "Nombre": row['Nombre_ataque_' + str(it)],
+                        "Tipo": row['Tipo_ataque_' + str(it)],
+                        "Clase": row['Clase_ataque_' + str(it)],
+                        "Efecto": row['Efecto_del_ataque_' + str(it)]
+                    }
+
+                    if temp_move["Nombre"] in unique_moves:
+                        continue
+                    else:
+                        unique_moves.add(temp_move["Nombre"])
+                        generateCard(img, temp_move, dir)
+                     
+                
+    return
+
+
+def cambiarClase(image, cardParams):
+    if(cardParams['Clase'] == 'Estado'):
+        change_visible(image, 'Estado_1', True) 
+
+    elif(cardParams['Clase'] == 'Fisico'):
+        change_visible(image, 'Fisico_1', True) 
+
+    elif(cardParams['Clase'] == 'Especial'):
+        change_visible(image, 'Especial_1', True) 
+    
+    
+
+def cambiarTiposPokemon(image, cardParams):
+    # Cambiamos el 1er tipo
+    if(cardParams['Tipo'] == 'Normal'):
+        change_visible(image, 'Tipo_1_Normal', True) 
+
+    elif(cardParams['Tipo'] == 'Lucha'):
+        change_visible(image, 'Tipo_1_Lucha', True)  
+
+    elif(cardParams['Tipo'] == 'Volador'):
+        change_visible(image, 'Tipo_1_Volador', True)  
+
+    elif(cardParams['Tipo'] == 'Veneno'):
+        change_visible(image, 'Tipo_1_Veneno', True)  
+
+    elif(cardParams['Tipo'] == 'Tierra'):
+        change_visible(image, 'Tipo_1_Tierra', True)  
+
+    elif(cardParams['Tipo'] == 'Roca'):
+        change_visible(image, 'Tipo_1_Roca', True)  
+
+    elif(cardParams['Tipo'] == 'Bicho'):
+        change_visible(image, 'Tipo_1_Bicho', True) 
+
+    elif(cardParams['Tipo'] == 'Fantasma'):
+        change_visible(image, 'Tipo_1_Fantasma', True)  
+
+    elif(cardParams['Tipo'] == 'Acero'):
+        change_visible(image, 'Tipo_1_Acero', True) 
+
+    elif(cardParams['Tipo'] == 'Fuego'):
+        change_visible(image, 'Tipo_1_Fuego', True) 
+
+    elif(cardParams['Tipo'] == 'Agua'):
+        change_visible(image, 'Tipo_1_Agua', True) 
+
+    elif(cardParams['Tipo'] == 'Planta'):
+        change_visible(image, 'Tipo_1_Planta', True)  
+
+    elif(cardParams['Tipo'] == 'Electrico'):
+        change_visible(image, 'Tipo_1_Electrico', True)
+
+    elif(cardParams['Tipo'] == 'Psiquico'):
+        change_visible(image, 'Tipo_1_Psiquico', True)  
+
+    elif(cardParams['Tipo'] == 'Hielo'):
+        change_visible(image, 'Tipo_1_Hielo', True) 
+
+    elif(cardParams['Tipo'] == 'Dragon'):
+        change_visible(image, 'Tipo_1_Dragon', True) 
+
+    elif(cardParams['Tipo'] == 'Siniestro'):
+        change_visible(image, 'Tipo_1_Siniestro', True) 
+
+    elif(cardParams['Tipo'] == 'Hada'):
+        change_visible(image, 'Tipo_1_Hada', True)
+    else:
+        gimp.pdb.gimp_message(cardParams['Tipo'] + ' Tipo invalido en: '+ cardParams['Nombre'])
+  
+
+def resetear(image, cardParams):
+    # Reseteamos el Tipo_1 para la siguiente carta
+    if(cardParams['Tipo'] == 'Normal'):
+        change_visible(image, 'Tipo_1_Normal', False) 
+
+    elif(cardParams['Tipo'] == 'Lucha'):
+        change_visible(image, 'Tipo_1_Lucha', False)  
+
+    elif(cardParams['Tipo'] == 'Volador'):
+        change_visible(image, 'Tipo_1_Volador', False)  
+
+    elif(cardParams['Tipo'] == 'Veneno'):
+        change_visible(image, 'Tipo_1_Veneno', False)  
+
+    elif(cardParams['Tipo'] == 'Tierra'):
+        change_visible(image, 'Tipo_1_Tierra', False)  
+
+    elif(cardParams['Tipo'] == 'Roca'):
+        change_visible(image, 'Tipo_1_Roca', False)  
+
+    elif(cardParams['Tipo'] == 'Bicho'):
+        change_visible(image, 'Tipo_1_Bicho', False) 
+
+    elif(cardParams['Tipo'] == 'Fantasma'):
+        change_visible(image, 'Tipo_1_Fantasma', False)  
+
+    elif(cardParams['Tipo'] == 'Acero'):
+        change_visible(image, 'Tipo_1_Acero', False) 
+
+    elif(cardParams['Tipo'] == 'Fuego'):
+        change_visible(image, 'Tipo_1_Fuego', False) 
+
+    elif(cardParams['Tipo'] == 'Agua'):
+        change_visible(image, 'Tipo_1_Agua', False) 
+
+    elif(cardParams['Tipo'] == 'Planta'):
+        change_visible(image, 'Tipo_1_Planta', False)  
+
+    elif(cardParams['Tipo'] == 'Electrico'):
+        change_visible(image, 'Tipo_1_Electrico', False)
+
+    elif(cardParams['Tipo'] == 'Psiquico'):
+        change_visible(image, 'Tipo_1_Psiquico', False)  
+
+    elif(cardParams['Tipo'] == 'Hielo'):
+        change_visible(image, 'Tipo_1_Hielo', False) 
+
+    elif(cardParams['Tipo'] == 'Dragon'):
+        change_visible(image, 'Tipo_1_Dragon', False) 
+
+    elif(cardParams['Tipo'] == 'Siniestro'):
+        change_visible(image, 'Tipo_1_Siniestro', False) 
+
+    elif(cardParams['Tipo'] == 'Hada'):
+        change_visible(image, 'Tipo_1_Hada', False)  
+
+    #Resteamos la clase del ataque 1:
+    if(cardParams['Clase'] == 'Estado'):
+        change_visible(image, 'Estado_1', False) 
+
+    elif(cardParams['Clase'] == 'Fisico'):
+        change_visible(image, 'Fisico_1', False) 
+
+    elif(cardParams['Clase'] == 'Especial'):
+        change_visible(image, 'Especial_1', False) 
+
+    # Reseteamos la carta base
+    if(cardParams['Tipo'] == 'Normal'):
+        change_visible(image, 'Carta_Normal', False) 
+
+    elif(cardParams['Tipo'] == 'Lucha'):
+        change_visible(image, 'Carta_Lucha', False)  
+
+    elif(cardParams['Tipo'] == 'Volador'):
+        change_visible(image, 'Carta_Volador', False)  
+
+    elif(cardParams['Tipo'] == 'Veneno'):
+        change_visible(image, 'Carta_Veneno', False)  
+
+    elif(cardParams['Tipo'] == 'Tierra'):
+        change_visible(image, 'Carta_Tierra', False)  
+
+    elif(cardParams['Tipo'] == 'Roca'):
+        change_visible(image, 'Carta_Roca', False)  
+
+    elif(cardParams['Tipo'] == 'Bicho'):
+        change_visible(image, 'Carta_Bicho', False) 
+
+    elif(cardParams['Tipo'] == 'Fantasma'):
+        change_visible(image, 'Carta_Fantasma', False)  
+
+    elif(cardParams['Tipo'] == 'Acero'):
+        change_visible(image, 'Carta_Metal', False) 
+
+    elif(cardParams['Tipo'] == 'Fuego'):
+        change_visible(image, 'Carta_Fuego', False) 
+
+    elif(cardParams['Tipo'] == 'Agua'):
+        change_visible(image, 'Carta_Agua', False) 
+
+    elif(cardParams['Tipo'] == 'Planta'):
+        change_visible(image, 'Carta_Planta', False)  
+
+    elif(cardParams['Tipo'] == 'Electrico'):
+        change_visible(image, 'Carta_Electrico', False)
+
+    elif(cardParams['Tipo'] == 'Psiquico'):
+        change_visible(image, 'Carta_Psiquico', False)  
+
+    elif(cardParams['Tipo'] == 'Hielo'):
+        change_visible(image, 'Carta_Hielo', False) 
+
+    elif(cardParams['Tipo'] == 'Dragon'):
+        change_visible(image, 'Carta_Dragon', False) 
+
+    elif(cardParams['Tipo'] == 'Siniestro'):
+        change_visible(image, 'Carta_Siniestro', False) 
+
+    elif(cardParams['Tipo'] == 'Hada'):
+        change_visible(image, 'Carta_Hada', False)  
+
+def cambiarCartaBase(image, cardParams):
+    # Cambiamos la carta segun el tipo principal
+    if(cardParams['Tipo'] == 'Normal'):
+        change_visible(image, 'Carta_Normal', True) 
+
+    elif(cardParams['Tipo'] == 'Lucha'):
+        change_visible(image, 'Carta_Lucha', True)  
+
+    elif(cardParams['Tipo'] == 'Volador'):
+        change_visible(image, 'Carta_Volador', True)  
+
+    elif(cardParams['Tipo'] == 'Veneno'):
+        change_visible(image, 'Carta_Veneno', True)  
+
+    elif(cardParams['Tipo'] == 'Tierra'):
+        change_visible(image, 'Carta_Tierra', True)  
+
+    elif(cardParams['Tipo'] == 'Roca'):
+        change_visible(image, 'Carta_Roca', True)  
+
+    elif(cardParams['Tipo'] == 'Bicho'):
+        change_visible(image, 'Carta_Bicho', True) 
+
+    elif(cardParams['Tipo'] == 'Fantasma'):
+        change_visible(image, 'Carta_Fantasma', True)  
+
+    elif(cardParams['Tipo'] == 'Acero'):
+        change_visible(image, 'Carta_Metal', True) 
+
+    elif(cardParams['Tipo'] == 'Fuego'):
+        change_visible(image, 'Carta_Fuego', True) 
+
+    elif(cardParams['Tipo'] == 'Agua'):
+        change_visible(image, 'Carta_Agua', True) 
+
+    elif(cardParams['Tipo'] == 'Planta'):
+        change_visible(image, 'Carta_Planta', True)  
+
+    elif(cardParams['Tipo'] == 'Electrico'):
+        change_visible(image, 'Carta_Electrico', True)
+
+    elif(cardParams['Tipo'] == 'Psiquico'):
+        change_visible(image, 'Carta_Psiquico', True)  
+
+    elif(cardParams['Tipo'] == 'Hielo'):
+        change_visible(image, 'Carta_Hielo', True) 
+
+    elif(cardParams['Tipo'] == 'Dragon'):
+        change_visible(image, 'Carta_Dragon', True) 
+
+    elif(cardParams['Tipo'] == 'Siniestro'):
+        change_visible(image, 'Carta_Siniestro', True) 
+
+    elif(cardParams['Tipo'] == 'Hada'):
+        change_visible(image, 'Carta_Hada', True) 
+
+
+def generateCard(image, cardParams, dir):
+    # Cambiamos el nombre
+    change_text(image,'Nombre', cardParams['Nombre'])
+    # Cambiamos el Efecto
+    change_text(image,'Efecto', cardParams['Efecto'])
+    
+    cambiarTiposPokemon(image, cardParams)
+
+    cambiarCartaBase(image, cardParams)
+
+    cambiarClase(image, cardParams)
+    
+    # Guardamos la imagen
+    new_image = pdb.gimp_image_duplicate(image)
+    layer = pdb.gimp_image_merge_visible_layers(new_image, CLIP_TO_IMAGE)
+    pdb.gimp_file_save(new_image, layer, dir + '/' +cardParams['Nombre']+ '.png', '?')
+    pdb.gimp_image_delete(new_image)
+
+    resetear(image, cardParams)
+
+    return
+    
+def change_text(image, layerName, text):
+    layer = pdb.gimp_image_get_layer_by_name(image, layerName)
+    pdb.gimp_text_layer_set_text(layer, text)
+    return
+
+def change_text_color(image, layerName, color):
+    layer = pdb.gimp_image_get_layer_by_name(image, layerName)
+    pdb.gimp_text_layer_set_color(layer, color)
+    return
+        
+def change_visible(image, layerName, visible):
+    if(layerName != ""):
+        layer = pdb.gimp_image_get_layer_by_name(image, layerName)
+        if(layer == None):
+            gimp.pdb.gimp_message(layerName + " no existe.")
+            return
+        layer.visible = visible
+        return
+        
+register(
+    "Generate_Moves_pokemon",
+    "Generate_Moves_pokemon with a CSV file, make sure to corectly set the initial visibility of all layers.",
+    "Generate_Moves_pokemon from CSV file",
+    "Javiortig",
+    "Javiortig",
+    "2022",
+    "Generate_Moves_pokemon",
+    "",
+    [
+ 	(PF_FILE, "file", "CSV file", ""),
+    (PF_DIRNAME, "dir", "Output directory", "/home/javiortig/pokemon_card_game/mis_cartas/Movimientos"),
+    ],
+    [],
+    generate, menu="<Image>/Image/Generate_Moves_pokemon")
+
+main()

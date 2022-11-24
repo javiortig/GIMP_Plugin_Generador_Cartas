@@ -1008,19 +1008,19 @@ def change_visible(image, layerName, visible):
         return
         
 register(
-    "Generate_Cards_pokemon",
-    "Generate_Cards_pokemon with a CSV file, make sure to corectly set the initial visibility of all layers.",
-    "Generate_Cards_pokemon from CSV file",
+    "Generate_Items_pokemon",
+    "Generate_Items_pokemon with a CSV file, make sure to corectly set the initial visibility of all layers.",
+    "Generate_Items_pokemon from CSV file",
     "Javiortig",
     "Javiortig",
     "2022",
-    "Generate_Cards_pokemon",
+    "Generate_Items_pokemon",
     "",
     [
  	(PF_FILE, "file", "CSV file", ""),
     (PF_DIRNAME, "dir", "Output directory", "/home/javiortig/pokemon_card_game/mis_cartas"),
     ],
     [],
-    generate, menu="<Image>/Image/Generate_Cards_pokemon")
+    generate, menu="<Image>/Image/Generate_Items_pokemon")
 
 main()
