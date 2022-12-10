@@ -2,8 +2,8 @@ import csv
 import json
  
 
-SRC_FILE = "./playerLogs.csv"
-DEST_FILE = "./web/Pokemon_web/src/data/playerLogs.js"
+SRC_FILE = "./descubiertos.csv"
+DEST_FILE = "./web/Pokemon_web/src/data/descubiertos.js"
 
 def line_prepender(filename, line):
     with open(filename, 'r+') as f:
@@ -26,7 +26,7 @@ def csv_to_json(csvFile, jsonFile):
         #Dumping the data into jsonfile.json
         jsonfile.write(json.dumps(jsondict, indent = 4))  #indent is used for pretty printing
 
-    line_prepender(jsonFile, "export const playerLogs =")
+    line_prepender(jsonFile, "export const pokemonDescubiertos =")
 
     
 
