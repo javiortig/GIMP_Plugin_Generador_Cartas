@@ -566,7 +566,17 @@ def resetear(image, cardParams):
         change_visible(image, 'base_siniestro', False) 
 
     elif(cardParams['Tipo_1'] == 'Hada'):
-        change_visible(image, 'base_hada', False)  
+        change_visible(image, 'base_hada', False) 
+
+    # Reseteamos los textos:
+    change_text(image,'Nombre_Habilidad', '')
+    change_text(image,'Efecto_Habilidad', '')
+    change_text(image,'Nombre_ataque_1', '')
+    change_text(image,'Potencia_1', '')
+    change_text(image,'Nombre_ataque_2', '')
+    change_text(image,'Potencia_2', '')
+    change_text(image,'Nombre_ataque_3', '')
+    change_text(image,'Potencia_3', '')
 
     # Reseteamos el splashart para el siguiente
     image.remove_layer(art_layer) 
@@ -656,6 +666,9 @@ def cambiarPrimerAtaque(image, cardParams):
 
 
 def cambiarSegundoAtaque(image, cardParams):
+    if(cardParams['Nombre_ataque_2'] == ''):
+        return
+
     change_text(image,'Nombre_ataque_2', cardParams['Nombre_ataque_2'])
     change_text(image,'Potencia_2', cardParams['Potencia_2'])
 
@@ -737,6 +750,8 @@ def cambiarSegundoAtaque(image, cardParams):
 
 #Ulti
 def cambiarTercerAtaque(image, cardParams):
+    if(cardParams['Nombre_ataque_3'] == ''):
+        return
     #Comprobamos si tiene es una ulti o no
     if (cardParams['Es_ulti'] == 'Y' or cardParams['Es_ulti'] == 'Yes' or cardParams['Es_ulti'] == 'yes' or cardParams['Es_ulti'] == 'y' or cardParams['Es_ulti'] == 's' or cardParams['Es_ulti'] == 'S' or cardParams['Es_ulti'] == 'si' or cardParams['Es_ulti'] == 'Si'):
     #     if(cardParams['Tipo_1'] == 'Siniestro' or cardParams['Tipo_1'] == 'Fantasma'):
@@ -982,6 +997,7 @@ def generateCard(image, cardParams, dir, id):
     new_image = pdb.gimp_image_duplicate(image)
     layer = pdb.gimp_image_merge_visible_layers(new_image, CLIP_TO_IMAGE)
     pdb.gimp_file_save(new_image, layer, dir + '/' + cardParams['Tipo_1'] + '/' + cardParams['Nombre'] + '_' + cardParams['Raza']+ '.png', '?')
+    pdb.gimp_file_save(new_image, layer, dir + '/cartas_finales/' + cardParams['Nombre'] + '_' + cardParams['Raza']+ '.png', '?')
     pdb.gimp_image_delete(new_image)
 
     resetear(image, cardParams)
