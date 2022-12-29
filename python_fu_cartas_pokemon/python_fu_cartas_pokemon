@@ -142,7 +142,7 @@ def cambiarTiposPokemon(image, cardParams):
         change_visible(image, 'Tipo_2_Bicho', True) 
 
     elif(cardParams['Tipo_2'] == 'Fantasma'):
-        change_visible(image, 'Tipo_1_Fantasma', True)  
+        change_visible(image, 'Tipo_2_Fantasma', True)  
 
     elif(cardParams['Tipo_2'] == 'Acero'):
         change_visible(image, 'Tipo_2_Acero', True) 
@@ -255,7 +255,7 @@ def resetear(image, cardParams):
         change_visible(image, 'Tipo_2_Bicho', False) 
 
     elif(cardParams['Tipo_2'] == 'Fantasma'):
-        change_visible(image, 'Tipo_1_Fantasma', False)  
+        change_visible(image, 'Tipo_2_Fantasma', False)  
 
     elif(cardParams['Tipo_2'] == 'Acero'):
         change_visible(image, 'Tipo_2_Acero', False) 
@@ -301,10 +301,10 @@ def resetear(image, cardParams):
     if(cardParams['Clase_ataque_2'] == 'Estado'):
         change_visible(image, 'Estado_2', False) 
 
-    elif(cardParams['Clase_ataque_1'] == 'Fisico'):
+    elif(cardParams['Clase_ataque_2'] == 'Fisico'):
         change_visible(image, 'Fisico_2', False) 
 
-    elif(cardParams['Clase_ataque_1'] == 'Especial'):
+    elif(cardParams['Clase_ataque_2'] == 'Especial'):
         change_visible(image, 'Especial_2', False) 
 
     #Resteamos la clase del ataque 3:
@@ -319,10 +319,8 @@ def resetear(image, cardParams):
 
     # Reseteamos las imagenes de las ultis
     if (cardParams['Es_ulti'] == 'Y' or cardParams['Es_ulti'] == 'Yes' or cardParams['Es_ulti'] == 'yes' or cardParams['Es_ulti'] == 'y' or cardParams['Es_ulti'] == 's' or cardParams['Es_ulti'] == 'S' or cardParams['Es_ulti'] == 'si' or cardParams['Es_ulti'] == 'Si'):
-    #     if(cardParams['Tipo_1'] == 'Siniestro' or cardParams['Tipo_1'] == 'Fantasma'):
-    #         change_visible(image, 'Bordes_blanco', False) 
-    #     else:
-    #         change_visible(image, 'Borde_negro', False) 
+        change_visible(image, 'Bordes_blanco', False)
+        change_visible(image, 'Borde_negro', False) 
 
         #Sacamos el coste:
         if (cardParams['Coste_energia'] == '0'):
@@ -573,18 +571,33 @@ def resetear(image, cardParams):
     change_text(image,'Efecto_Habilidad', '')
     change_text(image,'Nombre_ataque_1', '')
     change_text(image,'Potencia_1', '')
+    change_text(image,'Efecto_del_ataque_1', '')
     change_text(image,'Nombre_ataque_2', '')
     change_text(image,'Potencia_2', '')
+    change_text(image,'Efecto_del_ataque_2', '')
     change_text(image,'Nombre_ataque_3', '')
     change_text(image,'Potencia_3', '')
+    change_text(image,'Efecto_del_ataque_3', '')
 
     # Reseteamos el splashart para el siguiente
     image.remove_layer(art_layer) 
-    
+
+    # Reseteamos habilidad alternativa:
+    change_visible(image, 'Nombre_Habilidad_2', False)
+    change_visible(image, 'Nombre_Habilidad', True)
 
 def cambiarHabilidad(image, cardParams):
-    change_text(image,'Nombre_Habilidad', cardParams['Nombre_Habilidad'])
+    # Para evitar que el rojo de la habilidad solape con el fondo
+    if(cardParams['Tipo_1'] == 'Fuego'):
+        change_visible(image, 'Nombre_Habilidad_2', True)
+        change_visible(image, 'Nombre_Habilidad', False)
+        change_text(image,'Nombre_Habilidad_2', cardParams['Nombre_Habilidad'])
+    else:
+        change_text(image,'Nombre_Habilidad', cardParams['Nombre_Habilidad'])
+
     change_text(image,'Efecto_Habilidad', cardParams['Efecto_Habilidad'])
+
+    
 
 def cambiarPrimerAtaque(image, cardParams):
     change_text(image,'Nombre_ataque_1', cardParams['Nombre_ataque_1'])
@@ -754,10 +767,10 @@ def cambiarTercerAtaque(image, cardParams):
         return
     #Comprobamos si tiene es una ulti o no
     if (cardParams['Es_ulti'] == 'Y' or cardParams['Es_ulti'] == 'Yes' or cardParams['Es_ulti'] == 'yes' or cardParams['Es_ulti'] == 'y' or cardParams['Es_ulti'] == 's' or cardParams['Es_ulti'] == 'S' or cardParams['Es_ulti'] == 'si' or cardParams['Es_ulti'] == 'Si'):
-    #     if(cardParams['Tipo_1'] == 'Siniestro' or cardParams['Tipo_1'] == 'Fantasma'):
-    #         change_visible(image, 'Bordes_blanco', True) 
-    #     else:
-    #         change_visible(image, 'Borde_negro', True) 
+        if(cardParams['Tipo_1'] == 'Siniestro' or cardParams['Tipo_1'] == 'Fantasma'):
+            change_visible(image, 'Bordes_blanco', True) 
+        else:
+            change_visible(image, 'Borde_negro', True) 
 
         #Sacamos el coste:
         if (cardParams['Coste_energia'] == '0'):
